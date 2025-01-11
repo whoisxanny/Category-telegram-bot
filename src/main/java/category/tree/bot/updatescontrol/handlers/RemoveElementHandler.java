@@ -42,7 +42,6 @@ public class RemoveElementHandler implements ChatStateHandler {
         } catch (CategoryIsNotFound e) {
             bot.sendMessage(chatId, "Категория не найдена или не может быть удалена.");
         } finally {
-            // Сброс состояния чата после завершения операции.
             chatStates.remove(chatId);
         }
     }

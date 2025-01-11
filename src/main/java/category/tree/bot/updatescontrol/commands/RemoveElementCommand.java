@@ -21,9 +21,9 @@ public class RemoveElementCommand implements CommandHandler {
     /**
      * Конструктор команды RemoveElementCommand.
      *
-     * @param bot            Экземпляр бота для отправки сообщений и управления состояниями.
+     * @param bot             Экземпляр бота для отправки сообщений и управления состояниями.
      * @param categoryService Сервис для работы с категориями.
-     * @param chatStates     Карта состояний чатов, где ключ — ID чата, а значение — текущее состояние.
+     * @param chatStates      Карта состояний чатов, где ключ — ID чата, а значение — текущее состояние.
      */
     public RemoveElementCommand(TelegramBotUpdatesControl bot, CategoryService categoryService, Map<Long, MainChatStates> chatStates) {
         this.bot = bot;
@@ -42,7 +42,7 @@ public class RemoveElementCommand implements CommandHandler {
     public void execute(Update update) {
         long chatId = update.getMessage().getChatId();
         String messageText = update.getMessage().getText();
-            bot.sendMessage(chatId, "Введите название категории, которую хотите удалить. Все её подкатегории также будут удалены.");
-            chatStates.put(chatId, MainChatStates.REMOVE_ELEMENT);
+        bot.sendMessage(chatId, "Введите название категории, которую хотите удалить. Все её подкатегории также будут удалены.");
+        chatStates.put(chatId, MainChatStates.REMOVE_ELEMENT);
     }
 }

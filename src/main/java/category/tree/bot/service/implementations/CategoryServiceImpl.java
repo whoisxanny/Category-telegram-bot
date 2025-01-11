@@ -140,4 +140,11 @@ public class CategoryServiceImpl implements CategoryService {
         return List.of();
     }
 
+
+    @Transactional
+    @Override
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
+    }
+
 }

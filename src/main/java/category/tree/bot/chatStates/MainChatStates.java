@@ -4,7 +4,7 @@ public enum MainChatStates {
 
     ADD_ELEMENT,
     REMOVE_ELEMENT,
-    DEFAULT
+    UPLOAD_FILE, DEFAULT
 
 
 }

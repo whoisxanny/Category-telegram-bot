@@ -16,5 +16,7 @@ public interface CategoryService {
 
     List<String> getHelp();
 
+    List<Category> getAllCategories();
+
 
 }

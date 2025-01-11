@@ -43,9 +43,11 @@ public class HelpCommand implements CommandHandler {
             KeyboardRow row1 = new KeyboardRow();
             row1.add(new KeyboardButton("/addElement"));
             row1.add(new KeyboardButton("/removeElement"));
+            row1.add(new KeyboardButton("/viewTree"));
 
             KeyboardRow row2 = new KeyboardRow();
-            row2.add(new KeyboardButton("/viewTree"));
+            row2.add(new KeyboardButton("/download"));
+            row2.add(new KeyboardButton("/upload"));
 
             keyboard.add(row1);
             keyboard.add(row2);
@@ -58,7 +60,8 @@ public class HelpCommand implements CommandHandler {
                             + "/addElement - добавить категорию\n"
                             + "/removeElement - удалить категорию\n"
                             + "/viewTree - посмотреть дерево категорий\n"
-                            + "/help - показать это сообщение")
+                            + "/download - скачать excel-файл дерева категорий\n"
+                            + "/upload - показать это сообщение\n")
                     .replyMarkup(keyboardMarkup)
                     .build();
 

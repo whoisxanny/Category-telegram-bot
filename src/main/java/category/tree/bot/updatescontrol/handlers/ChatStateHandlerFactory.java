@@ -18,14 +18,16 @@ public class ChatStateHandlerFactory {
      *
      * @param categoryService Сервис для работы с категориями.
      * @param chatStates      Карта состояний чатов, где ключ — ID чата, а значение — текущее состояние.
-     *                         Используется для передачи в обработчики.
+     *                        Используется для передачи в обработчики.
      */
     public ChatStateHandlerFactory(CategoryService categoryService, Map<Long, MainChatStates> chatStates) {
         handlers = Map.of(
                 MainChatStates.ADD_ELEMENT, new AddElementHandler(categoryService, chatStates),
-                MainChatStates.REMOVE_ELEMENT, new RemoveElementHandler(categoryService, chatStates)
+                MainChatStates.REMOVE_ELEMENT, new RemoveElementHandler(categoryService, chatStates),
+                MainChatStates.UPLOAD_FILE, new UploadFileHandler(categoryService, chatStates) // Новый обработчик
         );
     }
+
 
     /**
      * Возвращает обработчик для заданного состояния чата.

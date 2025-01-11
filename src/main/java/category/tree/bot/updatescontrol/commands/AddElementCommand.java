@@ -1,7 +1,6 @@
 package category.tree.bot.updatescontrol.commands;
 
 import category.tree.bot.chatStates.MainChatStates;
-import category.tree.bot.exceptions.CategoryAlreadyExcists;
 import category.tree.bot.service.services.CategoryService;
 import category.tree.bot.updatescontrol.TelegramBotUpdatesControl;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -20,9 +19,9 @@ public class AddElementCommand implements CommandHandler {
     /**
      * Конструктор для создания команды AddElementCommand.
      *
-     * @param bot            Экземпляр бота для отправки сообщений и управления состояниями.
+     * @param bot             Экземпляр бота для отправки сообщений и управления состояниями.
      * @param categoryService Сервис для управления категориями.
-     * @param chatStates     Карта состояний чатов, где ключ — ID чата, а значение — текущее состояние.
+     * @param chatStates      Карта состояний чатов, где ключ — ID чата, а значение — текущее состояние.
      */
     public AddElementCommand(TelegramBotUpdatesControl bot, CategoryService categoryService, Map<Long, MainChatStates> chatStates) {
         this.bot = bot;

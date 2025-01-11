@@ -1,8 +1,6 @@
 package category.tree.bot.updatescontrol;
 
 import category.tree.bot.chatStates.MainChatStates;
-import category.tree.bot.exceptions.CategoryAlreadyExcists;
-import category.tree.bot.exceptions.CategoryIsNotFound;
 import category.tree.bot.service.services.CategoryService;
 import category.tree.bot.updatescontrol.commands.*;
 import category.tree.bot.updatescontrol.handlers.ChatStateHandler;
@@ -10,6 +8,8 @@ import category.tree.bot.updatescontrol.handlers.ChatStateHandlerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -31,11 +31,14 @@ public class TelegramBotUpdatesControl extends TelegramLongPollingBot {
 
     private final Map<Long, MainChatStates> chatStates = new HashMap<>();
 
+
+    private Update lastUpdate;
+
     /**
      * Конструктор класса TelegramBotUpdatesControl.
      *
-     * @param botUsername    Имя пользователя бота, заданное в настройках.
-     * @param botToken       Токен доступа к Telegram API.
+     * @param botUsername     Имя пользователя бота, заданное в настройках.
+     * @param botToken        Токен доступа к Telegram API.
      * @param categoryService Сервис для работы с категориями.
      * @param commandRegistry Реестр команд бота.
      */
@@ -62,6 +65,8 @@ public class TelegramBotUpdatesControl extends TelegramLongPollingBot {
         commandRegistry.registerCommand("/removeElement", new RemoveElementCommand(this, categoryService, chatStates));
         commandRegistry.registerCommand("/viewTree", new ViewTreeCommand(this, categoryService));
         commandRegistry.registerCommand("/help", new HelpCommand(this));
+        commandRegistry.registerCommand("/download", new DownloadCommand(this, categoryService));
+        commandRegistry.registerCommand("/upload", new UploadCommand(this, chatStates));
     }
 
     /**
@@ -145,5 +150,27 @@ public class TelegramBotUpdatesControl extends TelegramLongPollingBot {
     @Override
     public String getBotToken() {
         return botToken;
+    }
+
+
+    /**
+     * Возвращает последнее обновление.
+     *
+     * @return Объект Update, представляющий последнее обновление.
+     */
+    public Update getUpdate() {
+        return lastUpdate;
+    }
+
+    /**
+     * Получает файл из Telegram по его идентификатору.
+     *
+     * @param fileId Идентификатор файла.
+     * @return Объект File, представляющий файл из Telegram.
+     * @throws TelegramApiException Если произошла ошибка при запросе файла.
+     */
+    public File getFile(String fileId) throws TelegramApiException {
+        GetFile getFile = new GetFile(fileId);
+        return execute(getFile);
     }
 }
