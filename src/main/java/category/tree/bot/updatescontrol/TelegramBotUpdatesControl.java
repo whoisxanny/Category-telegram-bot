@@ -5,6 +5,8 @@ import category.tree.bot.exceptions.CategoryAlreadyExcists;
 import category.tree.bot.exceptions.CategoryIsNotFound;
 import category.tree.bot.service.services.CategoryService;
 import category.tree.bot.updatescontrol.commands.*;
+import category.tree.bot.updatescontrol.handlers.ChatStateHandler;
+import category.tree.bot.updatescontrol.handlers.ChatStateHandlerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -14,6 +16,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Класс TelegramBotUpdatesControl управляет обработкой обновлений, поступающих от Telegram,
+ * и взаимодействием с пользователями через бот.
+ */
 @Service
 public class TelegramBotUpdatesControl extends TelegramLongPollingBot {
 
@@ -21,9 +27,18 @@ public class TelegramBotUpdatesControl extends TelegramLongPollingBot {
     private final String botToken;
     private final CategoryService categoryService;
     private final CommandRegistry commandRegistry;
+    private final ChatStateHandlerFactory handlerFactory;
 
     private final Map<Long, MainChatStates> chatStates = new HashMap<>();
 
+    /**
+     * Конструктор класса TelegramBotUpdatesControl.
+     *
+     * @param botUsername    Имя пользователя бота, заданное в настройках.
+     * @param botToken       Токен доступа к Telegram API.
+     * @param categoryService Сервис для работы с категориями.
+     * @param commandRegistry Реестр команд бота.
+     */
     public TelegramBotUpdatesControl(
             @Value("${telegram.bot.username}") String botUsername,
             @Value("${telegram.bot.token}") String botToken,
@@ -33,12 +48,13 @@ public class TelegramBotUpdatesControl extends TelegramLongPollingBot {
         this.botToken = botToken;
         this.categoryService = categoryService;
         this.commandRegistry = commandRegistry;
+        this.handlerFactory = new ChatStateHandlerFactory(categoryService, chatStates);
 
         registerCommands();
     }
 
     /**
-     * Регистрация всех доступных команд.
+     * Регистрирует все доступные команды бота.
      */
     private void registerCommands() {
         commandRegistry.registerCommand("/start", new StartCommand(this));
@@ -48,7 +64,11 @@ public class TelegramBotUpdatesControl extends TelegramLongPollingBot {
         commandRegistry.registerCommand("/help", new HelpCommand(this));
     }
 
-
+    /**
+     * Обрабатывает входящие обновления от Telegram.
+     *
+     * @param update Объект обновления, содержащий данные о новом событии.
+     */
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
@@ -68,56 +88,20 @@ public class TelegramBotUpdatesControl extends TelegramLongPollingBot {
     }
 
     /**
-     * Обрабатывает команды, требующие взаимодействия с деревом категорий.
+     * Обрабатывает команды, не зарегистрированные в реестре команд,
+     * в зависимости от текущего состояния чата.
      *
      * @param chatId      Идентификатор чата.
-     * @param chatState   Состояние чата.
-     * @param messageText Текст сообщения.
+     * @param chatState   Текущее состояние чата.
+     * @param messageText Текст сообщения, отправленного пользователем.
      */
     private void handleCommand(long chatId, MainChatStates chatState, String messageText) {
-        switch (chatState) {
-            case ADD_ELEMENT -> {
-                String[] parts = messageText.split(" ", 2);
-                try {
-                    if (parts.length == 1) {
-                        categoryService.addElement(parts[0], null);
-                        sendMessage(chatId, "Новая категория добавлена: " + parts[0]);
-                    } else if (parts.length == 2) {
-                        categoryService.addElement(parts[0], parts[1]);
-                        sendMessage(chatId, "Подкатегория добавлена: " + parts[1] + " к родителю " + parts[0]);
-                    } else {
-                        sendMessage(chatId, "Ошибка! Введите название(-я) корректно!");
-                    }
-                } catch (CategoryAlreadyExcists e) {
-                    sendMessage(chatId, "Такая категория уже существует!");
-                }
-                chatStates.remove(chatId);
-            }
-            case REMOVE_ELEMENT -> {
-                try {
-                    String result = categoryService.removeElement(messageText);
-                    sendMessage(chatId, "Категория и её подкатегории (при наличии) удалены: " + result);
-                } catch (CategoryIsNotFound e) {
-                    sendMessage(chatId, "Категория не найдена или не может быть удалена.");
-                }
-                chatStates.remove(chatId);
-            }
-            default -> sendMessage(chatId, "Неизвестная команда.");
-        }
-    }
-
-    @Override
-    public String getBotUsername() {
-        return botUsername;
-    }
-
-    @Override
-    public String getBotToken() {
-        return botToken;
+        ChatStateHandler handler = handlerFactory.getHandler(chatState);
+        handler.handle(chatId, messageText, this);
     }
 
     /**
-     * Устанавливает состояние чата для пользователя.
+     * Устанавливает новое состояние чата для указанного пользователя.
      *
      * @param chatId Идентификатор чата.
      * @param state  Новое состояние чата.
@@ -141,5 +125,25 @@ public class TelegramBotUpdatesControl extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Возвращает имя пользователя бота.
+     *
+     * @return Имя пользователя бота.
+     */
+    @Override
+    public String getBotUsername() {
+        return botUsername;
+    }
+
+    /**
+     * Возвращает токен доступа бота.
+     *
+     * @return Токен доступа бота.
+     */
+    @Override
+    public String getBotToken() {
+        return botToken;
     }
 }

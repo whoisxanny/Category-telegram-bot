@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Реестр для управления командами бота.
+ * Класс для управления командами бота.
  */
 @Component
 public class CommandRegistry {

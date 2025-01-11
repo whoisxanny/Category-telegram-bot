@@ -12,15 +12,23 @@ import java.util.List;
 
 /**
  * Команда для отображения помощи и функционала бота.
+ * Предоставляет список доступных команд и отображает пользовательскую клавиатуру с кнопками для удобного взаимодействия.
  */
 public class HelpCommand implements CommandHandler {
 
     private final TelegramBotUpdatesControl bot;
 
+
     public HelpCommand(TelegramBotUpdatesControl bot) {
         this.bot = bot;
     }
 
+    /**
+     * Выполняет логику команды, отображая пользователю список доступных команд
+     * и предоставляя удобную клавиатуру для выбора действий.
+     *
+     * @param update Объект обновления, содержащий данные о новом сообщении.
+     */
     @Override
     public void execute(Update update) {
         long chatId = update.getMessage().getChatId();

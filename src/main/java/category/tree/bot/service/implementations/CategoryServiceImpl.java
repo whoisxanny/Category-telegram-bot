@@ -59,7 +59,7 @@ public class CategoryServiceImpl implements CategoryService {
      *
      * @param builder строковый билдер для записи дерева
      * @param category текущая категория
-     * @param depth текущая глубина вложенности
+     * @param depth текущая глубина вложенности, то есть уровень подкатегории
      */
     private void buildTreeView(StringBuilder builder, Category category, int depth) {
         builder.append("  ".repeat(depth)).append("--").append(category.getName()).append("\n");
@@ -78,7 +78,6 @@ public class CategoryServiceImpl implements CategoryService {
      * @param child имя подкатегории (null, если создается новая корневая категория)
      * @return созданная категория или родительская категория, к которой добавлена подкатегория
      */
-
     @Transactional
     @Override
     public Category addElement(String parent, String child) {
