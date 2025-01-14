@@ -45,4 +45,23 @@ public class RemoveElementCommand implements CommandHandler {
         bot.sendMessage(chatId, "Введите название категории, которую хотите удалить. Все её подкатегории также будут удалены.");
         chatStates.put(chatId, MainChatStates.REMOVE_ELEMENT);
     }
+
+    /**
+     * Обрабатывает удаление категории на основе пользовательского ввода.
+     *
+     * @param chatId      Идентификатор чата, в котором выполняется удаление.
+     * @param messageText Название категории для удаления, отправленное пользователем.
+     * @param bot         Экземпляр бота для отправки сообщений пользователю.
+     */
+    @Override
+    public void handle(long chatId, String messageText, TelegramBotUpdatesControl bot) {
+        try {
+            String result = categoryService.removeElement(messageText);
+            bot.sendMessage(chatId, "Категория и её подкатегории (при наличии) удалены: " + result);
+        } catch (CategoryIsNotFound e) {
+            bot.sendMessage(chatId, "Категория не найдена или не может быть удалена.");
+        } finally {
+            chatStates.remove(chatId);
+        }
+    }
 }

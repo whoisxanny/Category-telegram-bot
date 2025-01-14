@@ -70,4 +70,7 @@ public class HelpCommand implements CommandHandler {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void handle(long chatId, String messageText, TelegramBotUpdatesControl bot) {}
 }

@@ -30,7 +30,10 @@ public class Category {
         this.name = name;
     }
 
-    // Getters and Setters
+    public Category(String name, Category parent) {
+        this.name = name;
+        this.parent = parent;
+    }
 
     public Long getId() {
         return id;

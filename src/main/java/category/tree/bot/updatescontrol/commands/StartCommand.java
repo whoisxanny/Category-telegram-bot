@@ -22,4 +22,7 @@ public class StartCommand implements CommandHandler {
                 Используйте /help, чтобы узнать, что я умею.
                 """);
     }
+
+    @Override
+    public void handle(long chatId, String messageText, TelegramBotUpdatesControl bot) {}
 }

@@ -1,8 +1,8 @@
 package category.tree.bot.exceptions;
 
-public class CategoryAlreadyExcists extends RuntimeException {
+public class CategoryAlreadyExists extends RuntimeException {
 
-    public CategoryAlreadyExcists() {
+    public CategoryAlreadyExists() {
         super("Категория уже существует!");
     }
 }

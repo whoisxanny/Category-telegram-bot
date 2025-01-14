@@ -1,14 +1,13 @@
 package category.tree.bot.service.implementations;
 
 import category.tree.bot.entity.Category;
-import category.tree.bot.exceptions.CategoryAlreadyExcists;
+import category.tree.bot.exceptions.CategoryAlreadyExists;
 import category.tree.bot.exceptions.CategoryIsNotFound;
 import category.tree.bot.repository.CategoryRepository;
 import category.tree.bot.service.services.CategoryService;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.annotation.SessionScope;
 
 import java.util.List;
 
@@ -83,7 +82,7 @@ public class CategoryServiceImpl implements CategoryService {
     public Category addElement(String parent, String child) {
         if (child == null) {
             if (categoryRepository.existsByName(parent)) {
-                throw new CategoryAlreadyExcists();
+                throw new CategoryAlreadyExists();
             }
             Category newParent = new Category();
             newParent.setName(parent);
@@ -98,7 +97,7 @@ public class CategoryServiceImpl implements CategoryService {
                 });
 
         if (categoryRepository.existsByName(child)) {
-            throw new CategoryAlreadyExcists();
+            throw new CategoryAlreadyExists();
         }
 
         Category childCategory = new Category();
