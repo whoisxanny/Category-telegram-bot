@@ -52,9 +52,10 @@ public class RemoveElementCommand implements CommandHandler {
      * @param chatId      Идентификатор чата, в котором выполняется удаление.
      * @param messageText Название категории для удаления, отправленное пользователем.
      * @param bot         Экземпляр бота для отправки сообщений пользователю.
+     * @param update      Последний update в боте.
      */
     @Override
-    public void handle(long chatId, String messageText, TelegramBotUpdatesControl bot) {
+    public void handle(long chatId, String messageText, TelegramBotUpdatesControl bot, Update update) {
         try {
             String result = categoryService.removeElement(messageText);
             bot.sendMessage(chatId, "Категория и её подкатегории (при наличии) удалены: " + result);

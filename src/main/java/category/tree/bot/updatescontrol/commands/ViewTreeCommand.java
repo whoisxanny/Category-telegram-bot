@@ -16,7 +16,7 @@ public class ViewTreeCommand implements CommandHandler {
     private final CategoryService categoryService;
 
     /**
-     * Конструктор для создания команды отображения дерева категорий.
+     * Конструктор для создания команды, которая показывает дерево категорий.
      *
      * @param bot            Экземпляр управления обновлениями Telegram-бота.
      * @param categoryService Сервис для работы с категориями.
@@ -34,8 +34,13 @@ public class ViewTreeCommand implements CommandHandler {
     @Override
     public void execute(Update update) {
         long chatId = update.getMessage().getChatId();
-        String tree = categoryService.viewTree();
-        bot.sendMessage(chatId, "Дерево категорий:\n" + tree);
+
+        try {
+            String tree = categoryService.viewTree();
+            bot.sendMessage(chatId, "Дерево категорий:\n" + tree);
+        } catch (Exception e) {
+            bot.sendMessage(chatId, "Произошла ошибка при отображении дерева категорий: " + e.getMessage());
+        }
     }
 
     /**
@@ -44,7 +49,8 @@ public class ViewTreeCommand implements CommandHandler {
      * @param chatId      Идентификатор чата.
      * @param messageText Текст сообщения.
      * @param bot         Экземпляр управления Telegram-ботом.
+     * @param update      Последний update в боте.
      */
     @Override
-    public void handle(long chatId, String messageText, TelegramBotUpdatesControl bot) {}
+    public void handle(long chatId, String messageText, TelegramBotUpdatesControl bot, Update update) {}
 }

@@ -56,8 +56,9 @@ class AddElementCommandTest {
     void testHandle_AddNewCategory() {
         long chatId = 12345L;
         String messageText = "НоваяКатегория";
+        Update update = mock(Update.class);
 
-        addElementCommand.handle(chatId, messageText, bot);
+        addElementCommand.handle(chatId, messageText, bot, update);
 
         try {
             verify(categoryService).addElement("НоваяКатегория", null);
@@ -73,8 +74,9 @@ class AddElementCommandTest {
     void testHandle_AddNewSubCategory() {
         long chatId = 12345L;
         String messageText = "Родитель Подкатегория";
+        Update update = mock(Update.class);
 
-        addElementCommand.handle(chatId, messageText, bot);
+        addElementCommand.handle(chatId, messageText, bot, update);
 
         try {
             verify(categoryService).addElement("Родитель", "Подкатегория");
@@ -90,8 +92,9 @@ class AddElementCommandTest {
     void testHandle_InvalidInput() {
         long chatId = 12345L;
         String messageText = "Неверный Ввод Текста";
+        Update update = mock(Update.class);
 
-        addElementCommand.handle(chatId, messageText, bot);
+        addElementCommand.handle(chatId, messageText, bot, update);
 
         verify(bot).sendMessage(chatId, "Ошибка! Введите название(-я) корректно!");
         assertFalse(chatStates.containsKey(chatId));
@@ -101,10 +104,11 @@ class AddElementCommandTest {
     void testHandle_CategoryAlreadyExists() {
         long chatId = 12345L;
         String messageText = "СуществующаяКатегория";
+        Update update = mock(Update.class);
 
         doThrow(CategoryAlreadyExists.class).when(categoryService).addElement("СуществующаяКатегория", null);
 
-        addElementCommand.handle(chatId, messageText, bot);
+        addElementCommand.handle(chatId, messageText, bot, update);
 
         verify(bot).sendMessage(chatId, "Ошибка: такая категория уже существует!");
         assertFalse(chatStates.containsKey(chatId));

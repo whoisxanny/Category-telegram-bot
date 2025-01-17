@@ -79,7 +79,7 @@ public class TelegramBotUpdatesControl extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         logger.debug("Received update: {}", update);
-        if (update.hasMessage() && update.getMessage().hasText()) {
+        if (update.hasMessage() && update.getMessage().hasText() || update.getMessage().hasDocument()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
 
@@ -87,12 +87,13 @@ public class TelegramBotUpdatesControl extends TelegramLongPollingBot {
 
             CommandHandler command = commandRegistry.getCommand(messageText);
 
+
             if (command != null) {
                 logger.info("Executing command: {} for chatId: {}", messageText, chatId);
                 command.execute(update);
             } else {
-                logger.warn("Unknown command: {} for chatId: {}", messageText, chatId);
-                handleCommand(chatId, chatState, messageText);
+                logger.info("Handling command: {} for chatId: {}", messageText, chatId);
+                handleCommand(chatId, chatState, messageText, update);
             }
         }
     }
@@ -104,15 +105,16 @@ public class TelegramBotUpdatesControl extends TelegramLongPollingBot {
      * @param chatId      Идентификатор чата.
      * @param chatState   Текущее состояние чата.
      * @param messageText Текст сообщения, отправленного пользователем.
+     * @param update      Последний update в боте.
      */
-    private void handleCommand(long chatId, MainChatStates chatState, String messageText) {
+    private void handleCommand(long chatId, MainChatStates chatState, String messageText, Update update) {
         logger.debug("Handling command for chatId: {}, state: {}, message: {}", chatId, chatState, messageText);
         CommandHandler commandHandler = new CommandFactory(commandRegistry, this, categoryService, chatStates)
                 .getCommandHandler(messageText, chatState);
 
         if (commandHandler != null) {
             logger.info("Executing handler for chatId: {}", chatId);
-            commandHandler.handle(chatId, messageText, this);
+            commandHandler.handle(chatId, messageText, this, update);
         } else {
             logger.warn("No handler found for chatId: {} and message: {}", chatId, messageText);
             sendMessage(chatId, "Команда не распознана или не поддерживается в текущем состоянии.");

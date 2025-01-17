@@ -52,9 +52,10 @@ public class AddElementCommand implements CommandHandler {
      * @param chatId      Идентификатор чата, в котором пришло сообщение.
      * @param messageText Текст сообщения, отправленного пользователем.
      * @param bot         Экземпляр бота для отправки сообщений.
+     * @param update      Последний update в боте.
      */
     @Override
-    public void handle(long chatId, String messageText, TelegramBotUpdatesControl bot) {
+    public void handle(long chatId, String messageText, TelegramBotUpdatesControl bot, Update update) {
         String[] parts = messageText.split(" ", 2);
         try {
             if (parts.length == 1) {

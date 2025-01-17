@@ -72,5 +72,5 @@ public class HelpCommand implements CommandHandler {
     }
 
     @Override
-    public void handle(long chatId, String messageText, TelegramBotUpdatesControl bot) {}
+    public void handle(long chatId, String messageText, TelegramBotUpdatesControl bot, Update update) {}
 }

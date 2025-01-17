@@ -16,5 +16,5 @@ public interface CommandHandler {
      * @param messageText Текст сообщения, отправленного пользователем.
      * @param bot         Экземпляр бота для отправки сообщений или выполнения действий.
      */
-    void handle(long chatId, String messageText, TelegramBotUpdatesControl bot);
+    void handle(long chatId, String messageText, TelegramBotUpdatesControl bot, Update update);
 }

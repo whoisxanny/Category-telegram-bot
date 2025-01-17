@@ -4,22 +4,23 @@ import category.tree.bot.entity.Category;
 import category.tree.bot.service.services.CategoryService;
 import category.tree.bot.updatescontrol.TelegramBotUpdatesControl;
 import category.tree.bot.updatescontrol.commands.DownloadCommand;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.util.Arrays;
-import java.util.Collections;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 class DownloadCommandTest {
@@ -30,102 +31,86 @@ class DownloadCommandTest {
     @Mock
     private CategoryService categoryService;
 
+    @InjectMocks
     private DownloadCommand downloadCommand;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        downloadCommand = new DownloadCommand(bot, categoryService);
     }
 
-//    @Test
-//    void testExecute_Success() throws Exception {
-//        long chatId = 12345L;
-//        Update update = mock(Update.class);
-//        when(update.getMessage().getChatId()).thenReturn(chatId);
-//
-//        List<Category> categories = Arrays.asList(
-//                new Category("Категория1", null),
-//                new Category("Категория2", new Category("Категория1", null))
-//        );
-//        when(categoryService.getAllCategories()).thenReturn(categories);
-//
-//        downloadCommand.execute(update);
-//
-//        ArgumentCaptor<SendDocument> captor = ArgumentCaptor.forClass(SendDocument.class);
-//        verify(bot).execute(captor.capture());
-//
-//        SendDocument sendDocument = captor.getValue();
-//        assertEquals(String.valueOf(chatId), sendDocument.getChatId());
-//        assertEquals("categories_tree.xlsx", sendDocument.getDocument().getMediaName());
-//        assertEquals("Дерево категорий", sendDocument.getCaption());
-//
-//        // Проверяем содержимое файла
-//        File tempFile = new File(sendDocument.getDocument().getNewMediaFile());
-//        assertTrue(tempFile.exists());
-//
-//        try (FileInputStream fis = new FileInputStream(tempFile);
-//             var workbook = WorkbookFactory.create(fis)) {
-//            var sheet = workbook.getSheet("Categories");
-//            assertNotNull(sheet);
-//            assertEquals("Категория", sheet.getRow(0).getCell(0).getStringCellValue());
-//            assertEquals("Родительская категория", sheet.getRow(0).getCell(1).getStringCellValue());
-//            assertEquals("Категория1", sheet.getRow(1).getCell(0).getStringCellValue());
-//            assertEquals("", sheet.getRow(1).getCell(1).getStringCellValue());
-//            assertEquals("Категория2", sheet.getRow(2).getCell(0).getStringCellValue());
-//            assertEquals("Категория1", sheet.getRow(2).getCell(1).getStringCellValue());
-//        }
-//
-//        // Убедимся, что временный файл был удалён
-//        assertFalse(tempFile.exists());
-//    }
-
-
-//    @Test
-//    void testExecute_EmptyCategories() throws Exception {
-//        long chatId = 12345L;
-//        Update update = mock(Update.class);
-//        when(update.getMessage().getChatId()).thenReturn(chatId);
-//
-//        when(categoryService.getAllCategories()).thenReturn(Collections.emptyList());
-//
-//        downloadCommand.execute(update);
-//
-//        ArgumentCaptor<SendDocument> captor = ArgumentCaptor.forClass(SendDocument.class);
-//        verify(bot).execute(captor.capture());
-//
-//        SendDocument sendDocument = captor.getValue();
-//        assertEquals(String.valueOf(chatId), sendDocument.getChatId());
-//        assertEquals("categories_tree.xlsx", sendDocument.getDocument().getFileName());
-//        assertEquals("Дерево категорий", sendDocument.getCaption());
-//
-//        // Проверяем, что файл пустой (только заголовок)
-//        File file = new File(sendDocument.getDocument().getNewMediaFile());
-//        assertTrue(file.exists());
-//
-//        try (FileInputStream fis = new FileInputStream(file);
-//             var workbook = WorkbookFactory.create(fis)) {
-//            var sheet = workbook.getSheet("Categories");
-//            assertNotNull(sheet);
-//            assertEquals("Категория", sheet.getRow(0).getCell(0).getStringCellValue());
-//            assertEquals("Родительская категория", sheet.getRow(0).getCell(1).getStringCellValue());
-//            assertNull(sheet.getRow(1)); // Нет данных
-//        }
-//
-//        // Убедимся, что временный файл был удалён
-//        assertFalse(file.exists());
-//    }
-
     @Test
-    void testExecute_ExceptionHandling() throws Exception {
-        long chatId = 12345L;
+    void testExecute_Success() throws Exception {
         Update update = mock(Update.class);
-        when(update.getMessage().getChatId()).thenReturn(chatId);
+        Message message = mock(Message.class);
+        when(update.getMessage()).thenReturn(message);
+        when(message.getChatId()).thenReturn(12345L);
 
-        when(categoryService.getAllCategories()).thenThrow(new RuntimeException("Test exception"));
+        File tempFile = File.createTempFile("categories_tree", ".xlsx");
+        when(categoryService.getAllCategories()).thenReturn(new ArrayList<>());
+
+        doAnswer(invocation -> {
+            SendDocument sendDocument = invocation.getArgument(0);
+            InputFile document = sendDocument.getDocument();
+
+            // Проверяем, что имя файла корректно установлено
+            assertEquals("categories_tree.xlsx", document.getMediaName());
+            return null;
+        }).when(bot).execute(any(SendDocument.class));
 
         downloadCommand.execute(update);
 
-        verify(bot).sendMessage(chatId, "Ошибка при генерации файла: Test exception");
+        verify(bot, times(1)).execute(any(SendDocument.class));
+        tempFile.deleteOnExit();
+    }
+
+
+    @Test
+    void testExecute_GenerationFailure() {
+        Update update = mock(Update.class);
+        Message message = mock(Message.class);
+        when(update.getMessage()).thenReturn(message);
+        when(message.getChatId()).thenReturn(12345L);
+
+        doThrow(RuntimeException.class).when(categoryService).getAllCategories();
+
+        downloadCommand.execute(update);
+
+        verify(bot).sendMessage(12345L, "Ошибка при генерации файла: null");
+    }
+
+    @Test
+    void testGenerateExcelFile_CorrectFileStructure() throws IOException {
+        List<Category> mockCategories = new ArrayList<>();
+        Category parent = new Category();
+        parent.setName("Родитель");
+
+        Category child = new Category();
+        child.setName("Дочерняя");
+        child.setParent(parent);
+
+        mockCategories.add(parent);
+        mockCategories.add(child);
+
+        when(categoryService.getAllCategories()).thenReturn(mockCategories);
+
+        File file = downloadCommand.generateExcelFile();
+
+        assertTrue(file.exists());
+        assertTrue(file.length() > 0);
+
+        file.deleteOnExit();
+    }
+
+    @Test
+    void testGenerateExcelFile_EmptyCategories() throws IOException {
+        when(categoryService.getAllCategories()).thenReturn(new ArrayList<>());
+
+        File file = downloadCommand.generateExcelFile();
+
+        assertTrue(file.exists());
+        assertTrue(file.length() > 0);
+
+        file.deleteOnExit();
     }
 }

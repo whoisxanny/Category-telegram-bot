@@ -67,7 +67,7 @@ public class DownloadCommand implements CommandHandler {
      * @return Файл с данными о категориях.
      * @throws IOException Если возникает ошибка ввода-вывода при создании файла.
      */
-    private File generateExcelFile() throws IOException {
+    public File generateExcelFile() throws IOException {
         File file = File.createTempFile("categories_tree", ".xlsx");
 
         List<Category> categories = categoryService.getAllCategories();
@@ -103,7 +103,8 @@ public class DownloadCommand implements CommandHandler {
      * @param chatId      Идентификатор чата.
      * @param messageText Текст сообщения.
      * @param bot         Экземпляр управления Telegram-ботом.
+     * @param update      Последний update в боте.
      */
     @Override
-    public void handle(long chatId, String messageText, TelegramBotUpdatesControl bot) {}
+    public void handle(long chatId, String messageText, TelegramBotUpdatesControl bot, Update update) {}
 }
